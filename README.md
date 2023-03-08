@@ -10,8 +10,8 @@ A la sortie d'un champs après son édition, le SVG est redessinné.
 Permet de générer/télécharger le SVG à la volée.
 
 ## :calendar: A suivre
--[ ] test de découpe
--[ ] poignée sur glissière
--[ ] boite sans glissière
--[ ] découpage de l'espace en rangées/colonnes
--[ ] intercalaire amovibles
+- [ ] test de découpe
+- [ ] poignée sur glissière
+- [ ] boite sans glissière
+- [ ] découpage de l'espace en rangées/colonnes
+- [ ] intercalaire amovibles
