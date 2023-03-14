@@ -1,287 +1,220 @@
-var conf = {};
-var facteurMMvsPX = 1;
-
-
-function initDrawBox()
-{
-	$('#ntrfs .conf input').on('change', valChanged);
-	$('.downit').click(telechargerPlan);
-	valChanged();
-}
-
-function telechargerPlan() 
-{
-  var element = document.createElement('a');
-	text = document.querySelector('svg').outerHTML;
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + text);
-  element.setAttribute('download', 'plan.svg');
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
-	return false;
-}
-
-function valChanged()
-{
-	$('input').each(function() {conf[$(this).attr('id')] = parseInt(facteurMMvsPX*$(this).val());})
-	
-	extdims = ($('#innerbox').is(':checked')) ? 2*conf.espaisseur : 0;
-	conf['outlng'] = conf['inlng'] + extdims;
-	conf['outlrg'] = conf['inlrg'] + extdims;
-	conf['outhtr'] = conf['inhtr'] + conf.espaisseur;
-
-	drawBox();
-
-	$('#preview').attr({
-		width: $('#docw').val()+'mm', 
-		height: $('#doch').val()+'mm', 
-		viewBox: '0 0 '+$('#docw').val()+' '+$('#doch').val(),
-		'stroke-width': $('#strkwdth').val(),
-	});
-}
-
-
-function drawBox()
-{
-	$('#preview *').remove();
-	
-	//dessiner bord gauche
-	x0 = conf['mrgzone'];
-	y0 = conf['mrgzone'];
-	xm = x0;
-	ym = y0;
-	face1 = preparePart({x:x0, y:y0, w:conf.outhtr, h:conf.outlng, bords:4234, id:'face1'});
-	
-	//dessiner fond
-	x0 += face1.elmw + conf.mrgzone;
-	face2 = preparePart({x:x0, y:y0, w:conf.outlrg, h:conf.outlng, bords:4444, id:'face2'});
-	
-	//dessiner bord droite
-	x0 += face2.elmw + conf.mrgzone;
-	face3 = preparePart({x:x0, y:y0, w:conf.outhtr, h:conf.outlng, bords:3442, id:'face3'});
-	
-	//dessiner haut boite
-	x0 += face3.elmw + conf.mrgzone;
-	face4 = preparePart({x:x0, y:y0, w:conf.outlrg, h:conf.outlng, bords:3272, dekal:[0,0,conf.espaisseur,0], id:'face4'});
-	
-	ovrLrg = conf.outlrg-2*conf.decalcourbe-2*conf.courbure;
-	ovrX1 = x0+conf.espaisseur+conf.decalcourbe;
-	ovrX2 = ovrX1 + ovrLrg + 2*conf.courbure;
-	ovrY = y0+conf.espaisseur+conf.decalcourbe;
-	dessinerCmd([
-		'M'+ovrX1+','+(y0+conf.outlng+2*conf.espaisseur),
-		'v -' + (conf.outlng+conf.espaisseur-conf.decalcourbe-conf.courbure),
-		'Q '+ovrX1+','+ovrY+' '+(ovrX1+conf.courbure)+','+ovrY,
-		'h ' + ovrLrg,
-		'Q '+ovrX2+','+ovrY+' '+ovrX2+','+(ovrY+conf.courbure),
-		'v ' + (conf.outlng+conf.espaisseur-conf.decalcourbe-conf.courbure),
-	]);
-	
-	//support du couvercle
-	x0 += face4.elmw + conf.mrgzone;
-	face5 = preparePart({x:x0, y:y0, w:conf.outlrg, h:conf.outlng, bords:7767, dekal:[0,0,conf.espaisseur,0], id:'face5'});
-	ym = y0 + face4.elmh + conf.mrgzone + conf.espaisseur;
-
-	x0 += face5.elmw + conf.mrgzone;
-	face6 = preparePart({x:x0, y:y0, w:conf.outlrg, h:conf.outhtr, bords:1111, id:'face6'});
-	
-	y0 += face6.elmh + conf.mrgzone;
-	face7 = preparePart({x:x0, y:y0, w:conf.outlrg, h:conf.outhtr, bords:7111, dekal:[-conf.espaisseur,0,0,0], id:'face7'});
-	
-	xm = x0 + face7.elmw + conf.mrgzone + conf.espaisseur;
-	y0 += face7.elmh + conf.mrgzone + conf.espaisseur;
-	ym = Math.max(ym, y0);
-	
-	if($('#innerbox').is(':checked'))
-	{
-		x0 = conf['mrgzone'];
-		y0 = ym;
-		
-		inbox1 = preparePart({x:x0, y:y0, w:conf.outlng, h:conf.inhtr, bords:7272, id:'inbox1'});
-		ym = y0 + inbox1.elmh + conf.mrgzone + conf.espaisseur;
-		
-		x0 += inbox1.elmw + conf.mrgzone;
-		inbox2 = preparePart({x:x0, y:y0, w:conf.inlrg, h:conf.inhtr, bords:6464, id:'inbox2'});
-		
-		x0 += inbox2.elmw + conf.mrgzone;
-		inbox3 = preparePart({x:x0, y:y0, w:conf.outlng, h:conf.inhtr, bords:7272, id:'inbox3'});
-		
-		x0 += inbox3.elmw + conf.mrgzone;
-		inbox4 = preparePart({x:x0, y:y0, w:conf.inlrg, h:conf.inhtr, bords:6464, id:'inbox4'});
-		
-		xm = Math.max(xm, x0 + inbox4.elmw + conf.mrgzone + conf.espaisseur);
-	}
-
-
-
-	if($('#autocrop').is(':checked'))
-	{
-		$('#docw').val(xm);
-		$('#doch').val(ym);
-
-	}
-	document.getElementById("preview").innerHTML += "";
-	//console.log(face2);
-}
-
-/**
- * BORDS: hdbg
- * 1 -> cranté, début down/adjaçant down
- * 2 -> cranté, début down/adjaçant up
- * 3 -> cranté, début up/adjaçant down
- * 4 -> cranté, début up/adjaçant up
- * [variable dekal défini le recul, epaisseur par défaut]
- * 6 -> plat, adjaçant up
- * 7 -> plat, adjaçant down
+/*
+ * makeBox
+ * 
+ * Author : Erwan Kuznik
+ * http://www.wdev.pro/
+ * 
  */
-function preparePart(set)
+
+(function( $ )
 {
-	def = {print:true, id:'', cmd:[], elmw:0, elmh:0, dekal:[0,0,0,0]};
-	set = $.extend({}, def, set);
-	set.elmw = set.w;
-	set.elmh = set.h;
-	
-	bordsX = String(set.bords).split('');
-
-	switch(bordsX[0])
+	$.makeBox = function(elm, options) 
 	{
-		case '1' : set.cmd = ['M'+(set.x + conf.espaisseur)+','+(set.y + conf.espaisseur)]; break;
-		case '2' : set.cmd = ['M'+set.x+','+(set.y + conf.espaisseur) ]; break;
-		case '3' : set.cmd = ['M'+(set.x + conf.espaisseur)+','+set.y]; break;
-		case '4' : set.cmd = ['M'+set.x+','+set.y]; break;
-		case '6' : set.cmd = ['M'+set.x+','+(set.y + conf.espaisseur - set.dekal[0])]; break;
-		case '7' : set.cmd = ['M'+(set.x + conf.espaisseur)+','+(set.y + conf.espaisseur - set.dekal[0])]; break;
-	}
-	//console.log(set.cmd);
-
-	for(s=0; s<4; s++)
-	{
-		bordsX[s] = parseInt(bordsX[s]);
-		lng = isEven(s) ? set.w : set.h;
-		
-		sside = (s>0) ? s-1 : 3;
-		sup = (bordsX[s]<3 || bordsX[s]==7) ? 0 : 1;
-		sdekal = set.dekal[sside];
-		if(bordsX[sside]<5 && (bordsX[s]==2 || bordsX[s]==4 || bordsX[s]==6)) {sdekal += conf.espaisseur;}
-		
-		eside = (s<3) ? s+1 : 0;
-		eup = (isEven(bordsX[eside])) ? 0 : 1;
-		edekal = set.dekal[eside];
-		if(bordsX[eside]==3 || bordsX[eside]==4) {edekal += conf.espaisseur;}
-
-
-		if(bordsX[s]>5)
+		var def = 
 		{
-			switch(s)
-			{
-				case 0: set.cmd.push('h '+(lng + sdekal + edekal)); break;
-				case 1: set.cmd.push('v '+(lng + sdekal + edekal)); break;
-				case 2: set.cmd.push('h '+(-lng - sdekal - edekal)); break;
-				case 3: set.cmd.push('v '+(-lng - sdekal - edekal)); break;
-			}
+			docw:					400,
+			doch: 				300,
+
+			espaisseur: 	3,
+			brulage: 			.1,
+			strkwdth: 		.2,
+			mrgzone: 			2,
+
+			wcrans: 			10,
+			courbure: 		5,
+			decalcourbe: 	3,
+			autocrop: 		true,
+
+			list:					[],
 		}
-		else
+		var p = this;
+		p.set = {};
+		
+		var $elm = $(elm), elm = elm;
+		
+		p.init = function()
 		{
-			ncmd = creerLigneCrantee(
-				lng,
-				s,
-				sup, 
-				sdekal, 
-				eup,
-				edekal
-			)
-			set.cmd.push(ncmd);
+			p.set = $.extend({}, def, options, $elm.data());
+			
+			$elm.addClass('makebox');
+			p.creerInterface();
+			p.creerActions();
 
-			//console.log(set.id+' - '+s);
-			//console.log(ncmd);
-		}
-
-		if(isOdd(s)) 
-		{set.elmh+=conf.espaisseur}
-		else
-		{set.elmw+=conf.espaisseur}
-	}
-
-	if(set.print)
-	{
-		set.elm = $('<path d="'+set.cmd.join(' ')+'" fill="transparent" stroke="black" id="'+set.id+'" />');
-		set.elm.appendTo('#preview');
-		if(set.id!='') 
-		{
-			document.getElementById("preview").innerHTML += "";
-			set.elmbox = $('#'+set.id)[0].getBBox();
+			p.creerElement();
 		}
 		
-	}
 
-	return set;
-}
 
-/**
- * sens 	-> 0 haut, 1 droite, 2 bas, 3 gauche
- * sup  	-> start up
- * eup 		-> end side up
- */
-function creerLigneCrantee(lng, sens, sup, sdekal, eup, edekal)
-{
-	cmd = [];
-	//calcul de la largeur des crans, pour la régularité
-	crans = Math.floor(Math.abs(lng)/conf['wcrans']);
-	if((sup==eup && isOdd(crans)) || (sup!=eup && isEven(crans)))
-	{crans++;}
-	wcrans = lng/crans;
+		p.uploadConf = function()
+		{
+			console.log('Charger une configuration');
+		}
+		p.downloadConf = function()
+		{
+			console.log('Télécharger une configuration');
+		}
+		p.downloadSVG = function()
+		{
+			console.log('Téléchaerger le SVG');
+		}
+		p.updateSVGView = function()
+		{
 
-	/**** preparation des commandes selon sens ****/
-	//inversion horizontal/vertical
-	cld = isEven(sens) ? 'hv'.split('') : 'vh'.split('');
-	//on commence en up ou en down
-	dir = (sup==1) ? -1 : 1;
-	//sens de progression des axes selon la face
-	mlt = {
-		x: (sens<2) ? 1 : -1,
-		y: (sens==1 || sens==2) ? 1 : -1
+		}
+
+		p.creerElement = function(req)
+		{
+			var def = {
+				'type': 'quad', 'x' : 0, 'y' : 0, 'w' : 100, 'h' : 50, 
+				'dtls':	"11111111", 'dlta': [0,0,0,0],
+			};
+			conf = $.extend({}, def, req);
+			dtlsX = conf.dtls.split('');
+
+			var configurateur = $('<div class="element"></div>');
+			$('<div data-type="'+dtlsX[0]+'" class="coin hg"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+dtlsX[1]+'" class="cote h"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+dtlsX[2]+'" class="coin hd"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+dtlsX[7]+'" class="cote g"><span></span></div>').appendTo(configurateur);
+			$('<div class="zconf"></div>').appendTo(configurateur);
+			$('<div data-type="'+dtlsX[3]+'" class="cote d"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+dtlsX[6]+'" class="coin bg"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+dtlsX[5]+'" class="cote b"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+dtlsX[4]+'" class="coin bd"><span></span></div>').appendTo(configurateur);
+			
+			p.set.elmRoot.append(configurateur);
+		}
+
+		p.transmuterCoin = function(e)
+		{
+			tp = parseInt($(e.currentTarget).attr('data-type'));
+			$(e.currentTarget).attr('data-type', (tp>=4) ? 1 : tp+1);
+		}
+		p.transmuterCote = function(e)
+		{
+			tp = parseInt($(e.currentTarget).attr('data-type'));
+			$(e.currentTarget).attr('data-type', (tp>=5) ? 1 : tp+1);
+		}
+
+		/**********************************************************/
+		/*												 SETUP 													*/
+		/**********************************************************/
+		p.creerActions = function()
+		{
+			p.set.btnLoad.click(p.uploadConf);
+			p.set.btnSave.click(p.downloadConf);
+			p.set.btnDown.click(p.downloadSVG);
+			p.set.zonechps.find('input').on('change', p.updateSVGView);
+
+			p.set.elmRoot.on('click', '.coin', p.transmuterCoin);
+			p.set.elmRoot.on('click', '.cote', p.transmuterCote);
+		}
+		/**
+		 * Création de l'interface de l'application
+		 */
+		p.creerInterface = function()
+		{
+			var chp = {
+				"document":	[
+					["docw",				"Largeur doc."],
+					["doch",				"Hauteur doc."],
+				],
+				"bois":	[
+					["espaisseur",	"Epaisseur du bois"],
+					["brulage",			"Compensation brûlage"],
+					["strkwdth",		"Epaisseur de trait"],
+					["mrgzone",			"Marge de base"],
+				],
+				"dessin": [
+					["wcrans",			"Largeur des crans"],
+					["courbure",		"Courbe couvercle"],
+					["decalcourbe",	"Débord blocage couvercle"],
+				],
+				"options": [
+					["autocrop",		"Recadrer doc", "checkbox"]
+				],
+				"listeelm": []
+			};
+			
+			// vue
+			p.set.svg = $('<svg xmlns="http://www.w3.org/2000/svg" stroke-width=".2" id="preview" fill="transparent" stroke-opacity="1" stroke="black"></svg>').attr(
+				{
+					"width"						:	p.set.docw+"mm",
+					"height"					:	p.set.doch+"mm",
+					"viewBox"					:	"0 0 "+p.set.docw+" "+p.set.doch,
+					"stroke-width"		:	p.set.strkwdth,
+				});
+			var vue = $('<section class="vue"></section>').append(p.set.svg);
+			$elm.append(vue);
+			
+			//champs
+			var cnf = $('<section class="conf"></section>');
+			p.set.zonechps = $('<div class="areachp"></div>');
+			
+			$.each(chp, function(k,l){
+				p.creerFieldSet(k,l).appendTo(p.set.zonechps);
+			});
+			
+			p.set.zonechps.appendTo(cnf);
+
+			//boutons
+			var zonebtn = $('<div class="areabtn"></div>');
+			p.set.btnLoad = $('<a href="#" class="loader">✏️ Charger</a>').appendTo(zonebtn);
+			p.set.btnSave = $('<a href="#" class="saver">💾 Sauvegarder</a>').appendTo(zonebtn);
+			p.set.btnDown = $('<a href="#" class="dwnld">🗺️ Télécharger</a>').appendTo(zonebtn);
+			
+			zonebtn.appendTo(cnf);
+
+			p.set.elmRoot = cnf.find('.listeelm');
+			
+			cnf.appendTo($elm);
+		}
+
+		
+		/**********************************************************/
+		/*												 UTILS 													*/
+		/**********************************************************/
+
+		/**
+		 * Crée un <div> avec la class k, contenant les champs définits dans l
+		 * @param {string} k clé du groupe de champs
+		 * @param {Array} l liste de champs [id, label, [type]]
+		 * @returns object jQuery d'un div
+		 */
+		p.creerFieldSet = function(k,l)
+		{
+			var grp = $('<div class="'+k+'"></div>');
+			$.each(l, function(i,f){
+				switch(f[2])
+				{
+					case 'checkbox':
+						var fld = $('<label data-placeholder="'+f[1]+'" class="ischeck" ><input id="'+f[0]+'" type="checkbox"></label>');
+						if(typeof p.set[f[0]] != undefined && p.set[f[0]]===true) {$(fld).find('input').prop('checked', true);}
+					break;
+					default:
+						var fld = $('<label data-placeholder="'+f[1]+'" ><input id="'+f[0]+'" type="text"></label>');
+						if(typeof p.set[f[0]] != undefined) {fld.find('input').val(p.set[f[0]]);}
+					break;
+				}
+				fld.appendTo(grp);
+			});
+			return grp;
+		}
+		
+
+		p.init();
 	};
 
-	for(i=1; i<=crans; i++)
+	$.fn.makeBox = function(options) 
 	{
-		//coté adjacent up
-		if(i==1)
-		{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + sdekal)));}
-		else if(i==crans)
-		{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + edekal)));}
-		else
-		{
-			cmd.push(cld[0] +' '+ (mlt.x * wcrans));
-		}
-
-		if(i<crans)
-		{
-			cmd.push(cld[1] +' '+ (mlt.y * dir * conf.espaisseur));
-			dir*=-1;
-		}
+		return this.each(function() 
+			{
+				if (undefined == $(this).data('makeBox')) 
+				{
+					var p = new $.makeBox(this, options);
+					$(this).data('makeBox', p);
+				}
+		});
 	}
-	//console.log(cmd);
-	return cmd.join(' ');
-}
+})(jQuery);
 
-function dessinerCmd(cmd)
-{
-	elm = $('<path d="'+cmd.join(' ')+'" />');
-	elm.appendTo('#preview');
-}
-
-
-
-
-
-
-
-
-
-function isENotNull(n) {return (n!=0 && n % 2 == 0);}
-function isEven(n) {return n % 2 == 0;}
-function isOdd(n) {return Math.abs(n % 2) == 1;}

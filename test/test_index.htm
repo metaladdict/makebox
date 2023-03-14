@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>MakeBox</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="ntrfs">
+		<section class="vue">
+			<svg width="400mm" height="300mm" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" stroke-width=".2" id="preview" stroke-opacity="1"  fill="transparent" stroke="black">
+				
+			</svg>
+		</section>
+		<section class="conf">
+			<div class="area">
+				<div class="document">
+					<label data-placeholder="Largeur doc." ><input value="400" id="docw" type="text"></label>
+					<label data-placeholder="Hauteur doc." ><input value="300" id="doch" type="text"></label>
+				</div>
+				<div class="bois">
+					<label data-placeholder="Epaisseur du bois" ><input value="3" id="espaisseur" type="text"></label>
+					<label data-placeholder="Compensation brûlage" ><input value=".1" id="brulage" type="text"></label>
+					<label data-placeholder="Epaisseur de trait" ><input value=".2" id="strkwdth" type="text"></label>
+					<label data-placeholder="Marge de base" ><input value="2" id="mrgzone" type="text"></label>
+				</div>
+				<div class="boite">
+					<label data-placeholder="Longueur interne" ><input value="90" id="inlng" type="text"></label>
+					<label data-placeholder="Largeur interne" ><input value="60" id="inlrg" type="text"></label>
+					<label data-placeholder="Hauteur interne" ><input value="30" id="inhtr" type="text"></label>
+				</div>
+				<div class="dessin">
+					<label data-placeholder="Largeur des crans" ><input value="10" id="wcrans" type="text"></label>
+					<label data-placeholder="Courbe couvercle" ><input value="5" id="courbure" type="text"></label>
+					<label data-placeholder="Débord blocage couvercle" ><input value="3" id="decalcourbe" type="text"></label>
+				</div>
+				<div class="options">
+					<label data-placeholder="Recadrer doc" class="ischeck" ><input value="10" id="autocrop" type="checkbox" checked></label>
+					<label data-placeholder="Doublement parois" class="ischeck" ><input value="10" id="innerbox" type="checkbox" checked></label>
+				</div>
+			</div>
+			
+			<a href="#" class="area downit">Télécharger</a>
+		</section>
+	</div>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+	<script type="text/javascript" src="test_makebox.js"></script>
+	<script>$(document).ready(initDrawBox);</script>
+</body>
+</html>

@@ -2,12 +2,16 @@
 
 @import "z_reset.less";
 
+@wcold: 350px;
+@coteW: @wcold - 2*@wcoin - 35px;
+@wcoin: 40px;
+
 body
 {
 	font-size: 18px;
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: system-ui,Roboto,Arial,sans-serif;
 
-	#ntrfs
+	.makebox
 	{
 		display: flex;
 		flex-direction: row;
@@ -23,8 +27,9 @@ body
 
 			#preview
 			{
-				width: 100%;
+				width: 99%;
 				height: auto;
+				display: block;
 
 				border: 1px solid #ddd;
 			}
@@ -32,46 +37,258 @@ body
 		
 		.conf
 		{
-			flex: 350px 0 0;
+			flex: @wcold 0 0;
 			border-left: 1px solid #999;
 
 			display: flex;
 			flex-direction: column;
 			align-items: stretch;
+			max-height: 100vh;
 			
-			.area
+			> .areachp
 			{
-				flex: 1 0 auto;
+				flex: 1 1 auto;
+				overflow: auto;
+				> div 
+				{
+					padding: 2px 10px 0;
 
-				> div {padding: 5px 10px;}
+					&.listeelm 
+					{
+						background-color: #cbded2;
+						border-top: 1px solid #888;
+						label:after {background-color: #bbddbb;}
+						padding: 5px 10px;
+			
+						.element
+						{
+							margin: 6px;
+							display: flex;
+							flex-flow: wrap;
+							gap: 1px;
+			
+							> div
+							{
+								height: 20px;
+								background-color: #fff;
+								overflow: hidden;
+			
+								&.coin
+								{
+									height: @wcoin;
+									width: @wcoin;
+									flex: 1 0 @wcoin;
+									position: relative;
+									cursor: pointer;
+			
+									> span
+									{
+										width: @wcoin*3/4;
+										height: @wcoin*3/4;
+										border: 1px dotted #333;
+										display: block;
+										position: absolute;
+			
+										right: round(@wcoin/8);
+										bottom: round(@wcoin/8);
+			
+										&:before, &:after
+										{
+											content:"\00a0";
+											border-style: dotted;
+											border-color: inherit;
+											position: absolute;
+											width: 100%;
+											height: 100%;
+											display: block;
+										}
+										&:before
+										{
+											left: -1px;
+											height: 200%;
+											top: 100%;
+											height: 100%/4;
+											border-width: 0 1px;
+										}
+										&:after
+										{
+											bottom: -1px;
+											left: 100%;
+											width: 100%/4;
+											border-width: 1px 0;
+										}
+			
+									}
+									&[data-type="1"] span
+									{
+										border-style: solid dotted dotted solid;
+										&:before {border-style: none dotted none solid;}
+										&:after {border-style: solid none dotted none;}
+									}
+									&[data-type="2"] span
+									{
+										border-style: dotted solid dotted dotted;
+										&:before {border-style: none solid none dotted;}
+										&:after {border-style: solid none dotted none;}
+									}
+									&[data-type="3"] span
+									{
+										border-style: dotted dotted dotted dotted;
+										&:before {border-style: none solid none dotted;}
+										&:after {border-style: dotted none solid none;}
+									}
+									&[data-type="4"] span
+									{
+										border-style: dotted dotted solid dotted;
+										&:before {border-style: none dotted none solid;}
+										&:after {border-style: dotted none solid none;}
+									}
+			
+			
+									/*
+									&.hg, &.bg {span {right: @wcoin*1/8;}}
+									&.hd, &.bd {span {left: @wcoin*1/8;}}
+									&.hg, &.hd {span {bottom: @wcoin*1/8;}}
+									&.bg, &.bg {span {top: @wcoin*1/8;}}
+									*/
+			
+									&.hd span {rotate: 90deg;}
+									&.bd span {rotate: 180deg;}
+									&.bg span {rotate: 270deg;}
+								}
+			
+			
+			
+								&.cote
+								{
+									height: @wcoin;
+									width: @coteW;
+									flex: 1 0 @coteW;
+									position: relative;
+									cursor: pointer;
+			
+									&.g, &.d 
+									{
+										height: @coteW;
+										width: @wcoin;
+										flex: 1 0 @wcoin;
+									}
+			
+									> span
+									{
+										width: @coteW + 1;
+										height:  @wcoin;
+										position: relative;
+										display: block;
+										transform-origin: top left;
+										left: 50%;
+										top: 50%;
+										transform: translate(-50%,-50%);
+										//border-top: 1px dotted #333;
+			
+										&::before
+										{
+											width: @coteW;
+											height:  round(@wcoin*3/4) - 2;
+											content: "\00a0";
+											border-width: 1px 0;
+											border-color: #333;
+											display: block;
+											position: absolute;
+											border-style: dotted;
+											border-color: #333;
+											border-width: 1px 0;
+				
+											left: 0;
+											bottom: round(@wcoin/8);
+										}
+			
+										/*
+										&:before, &:after
+										{
+											content:"\00a0";
+											border-top: 1px solid #333;
+											border-left: 1px solid #333;
+											border-bottom: 1px solid #fff;
+											border-right: 1px solid #333;
+											position: absolute;
+											width: @wcoin;
+											height: round(@wcoin*3/4) - 2;
+											display: block;
+											left: 50%;
+											top: 0;
+										}
+										&:before
+										{
+											transform: translate(-150%, 0);
+										}
+										&:after
+										{
+											transform: translate(50%, 0);
+										}
+										*/
+									}
+			
+									&[data-type="1"] span:before {background: url(assets/cote_type1.svg) 0 -1px no-repeat;}
+									&[data-type="2"] span:before {background: url(assets/cote_type2.svg) 0 -1px no-repeat;}
+									&[data-type="3"] span:before {background: url(assets/cote_type3.svg) 0 -1px no-repeat;}
+									&[data-type="4"] span:before {background: url(assets/cote_type4.svg) 0 -1px no-repeat;}
+									&[data-type="5"] span:before {background: url(assets/cote_type5.svg) 0 -1px no-repeat;}
+			
+									&.d span {rotate: 90deg;}
+									&.b span {rotate: 180deg;}
+									&.g span {rotate: 270deg;}
+								}
+			
+								&.zconf
+								{
+									width: @wcold - 2*@wcoin - 35px;
+									height: @coteW;
+									flex: 1 0 (@wcold - 2*@wcoin - 35px);
+			
+								}
+							}
+						}
+					}
+				}
 			}
 
-			a.area
+			.areabtn
 			{
-				flex: 0 1 30px;
-				line-height: 30px;
-				vertical-align: middle;
-				text-align: center;
-				background-color: #37065f;
-				color: #fff;
-				text-decoration: none;
+				flex: 0 0 120px;
 			}
 
+			> div
+			{
+				> a
+				{
+					line-height: 40px;
+					text-align: center;
+					color: #fff;
+					text-decoration: none;
+					display: block;
 
+					&.loader {background-color: fade(#36065f, 40%);}
+					&.saver {background-color: fade(#36065f, 50%);;}
+					&.dwnld {background-color: fade(#36065f, 60%);}
+				}
+			}
 
 			label
 			{
-				display: block;
+				display: inline-block;
 				position: relative;
+				width: 49%;
+				&:nth-child(2n) {margin-left: 2%;}
 				
 				input[type=text]
 				{
 					display: block;
 					width: 100%;
-					margin: 3px 0;
-					padding: 8px 10px;
+					padding: 4px 4px;
 					border: 1px solid #999;
 					border-radius: 5px;
+					margin-bottom: 3px;
 				}
 				&:after
 				{
@@ -84,7 +301,7 @@ body
 					color:#fff;
 					padding: 4px 6px;
 					content: attr(data-placeholder);
-					font-size: .7em;
+					font-size: 8px;
 					border-radius: 5px;
 				}
 
