@@ -2,9 +2,10 @@
 
 @import "z_reset.less";
 
-@wcold: 350px;
-@coteW: @wcold - 2*@wcoin - 35px;
-@wcoin: 40px;
+@wcold: 329px;
+@wcoin: 30px;
+@coteW: @wcold - 2*@wcoin - 34px;
+@mrgCote: 5px;
 
 body
 {
@@ -37,7 +38,7 @@ body
 		
 		.conf
 		{
-			flex: @wcold 0 0;
+			flex: (@wcold - 1px) 0 0;
 			border-left: 1px solid #999;
 
 			display: flex;
@@ -49,6 +50,7 @@ body
 			{
 				flex: 1 1 auto;
 				overflow: auto;
+
 				> div 
 				{
 					padding: 2px 10px 0;
@@ -65,11 +67,9 @@ body
 							margin: 6px;
 							display: flex;
 							flex-flow: wrap;
-							gap: 1px;
 			
 							> div
 							{
-								height: 20px;
 								background-color: #fff;
 								overflow: hidden;
 			
@@ -83,168 +83,144 @@ body
 			
 									> span
 									{
-										width: @wcoin*3/4;
-										height: @wcoin*3/4;
+										width: @wcoin - @mrgCote;
+										height: @wcoin - @mrgCote;
 										border: 1px dotted #333;
 										display: block;
 										position: absolute;
 			
-										right: round(@wcoin/8);
-										bottom: round(@wcoin/8);
-			
-										&:before, &:after
-										{
-											content:"\00a0";
-											border-style: dotted;
-											border-color: inherit;
-											position: absolute;
-											width: 100%;
-											height: 100%;
-											display: block;
-										}
-										&:before
-										{
-											left: -1px;
-											height: 200%;
-											top: 100%;
-											height: 100%/4;
-											border-width: 0 1px;
-										}
-										&:after
-										{
-											bottom: -1px;
-											left: 100%;
-											width: 100%/4;
-											border-width: 1px 0;
-										}
-			
+										right: 0;
+										bottom: 0;
 									}
+
 									&[data-type="1"] span
 									{
-										border-style: solid dotted dotted solid;
-										&:before {border-style: none dotted none solid;}
-										&:after {border-style: solid none dotted none;}
+										border-style: solid none none solid;
+										&:before {border-style: none none none solid;}
+										&:after {border-style: solid none none none;}
 									}
 									&[data-type="2"] span
 									{
-										border-style: dotted solid dotted dotted;
-										&:before {border-style: none solid none dotted;}
-										&:after {border-style: solid none dotted none;}
+										border-style: none solid none none;
+										&:before {border-style: none solid none none;}
+										&:after {border-style: solid none none none;}
 									}
 									&[data-type="3"] span
 									{
-										border-style: dotted dotted dotted dotted;
-										&:before {border-style: none solid none dotted;}
-										&:after {border-style: dotted none solid none;}
+										width: 1px;
+										height: 1px;
+										background-color: #000;
+										border: none;
 									}
 									&[data-type="4"] span
 									{
-										border-style: dotted dotted solid dotted;
-										&:before {border-style: none dotted none solid;}
-										&:after {border-style: dotted none solid none;}
+										border-style: none none solid none;
+										&:before {border-style: none none none solid;}
+										&:after {border-style: none none solid none;}
 									}
+
 			
-			
-									/*
-									&.hg, &.bg {span {right: @wcoin*1/8;}}
-									&.hd, &.bd {span {left: @wcoin*1/8;}}
-									&.hg, &.hd {span {bottom: @wcoin*1/8;}}
-									&.bg, &.bg {span {top: @wcoin*1/8;}}
-									*/
-			
-									&.hd span {rotate: 90deg;}
-									&.bd span {rotate: 180deg;}
-									&.bg span {rotate: 270deg;}
+									&.hd {rotate: 90deg;}
+									&.bd {rotate: 180deg;}
+									&.bg {rotate: 270deg;}
 								}
 			
 			
 			
 								&.cote
 								{
-									height: @wcoin;
-									width: @coteW;
-									flex: 1 0 @coteW;
 									position: relative;
 									cursor: pointer;
+
+									> span
+									{
+										position: relative;
+										display: block;
+									}
 			
 									&.g, &.d 
 									{
 										height: @coteW;
 										width: @wcoin;
 										flex: 1 0 @wcoin;
+
+										> span
+										{
+											height: @coteW;
+											width: @wcoin;
+					
+											&::before
+											{
+												height: @coteW;
+												width: @wcoin - @mrgCote;
+												content: "\00a0";
+												border-width: 1px 0;
+												border-color: #333;
+												display: block;
+											}
+										}
+
+										&[data-type="1"] span:before {background: url(assets/verti_type1.svg) 0 0 no-repeat;}
+										&[data-type="2"] span:before {background: url(assets/verti_type2.svg) 0 0 no-repeat;}
+										&[data-type="3"] span:before {background: url(assets/verti_type3.svg) 0 0 no-repeat;}
+										&[data-type="4"] span:before {background: url(assets/verti_type4.svg) 0 0 no-repeat;}
+										&[data-type="5"] span:before {background: url(assets/verti_type5.svg) 0 0 no-repeat;}
 									}
 			
-									> span
+									&.h, &.b 
 									{
-										width: @coteW + 1;
-										height:  @wcoin;
-										position: relative;
-										display: block;
-										transform-origin: top left;
-										left: 50%;
-										top: 50%;
-										transform: translate(-50%,-50%);
-										//border-top: 1px dotted #333;
-			
-										&::before
+										height: @wcoin;
+										width: @coteW;
+										flex: 1 0 @coteW;
+	
+										> span
 										{
 											width: @coteW;
-											height:  round(@wcoin*3/4) - 2;
-											content: "\00a0";
-											border-width: 1px 0;
-											border-color: #333;
-											display: block;
-											position: absolute;
-											border-style: dotted;
-											border-color: #333;
-											border-width: 1px 0;
+											height:  @wcoin - @mrgCote;
+											
 				
-											left: 0;
-											bottom: round(@wcoin/8);
+											&::before
+											{
+												width: @coteW;
+												height: @wcoin - @mrgCote;
+												content: "\00a0";
+												border-width: 1px 0;
+												border-color: #333;
+												display: block;
+											}
 										}
-			
-										/*
-										&:before, &:after
-										{
-											content:"\00a0";
-											border-top: 1px solid #333;
-											border-left: 1px solid #333;
-											border-bottom: 1px solid #fff;
-											border-right: 1px solid #333;
-											position: absolute;
-											width: @wcoin;
-											height: round(@wcoin*3/4) - 2;
-											display: block;
-											left: 50%;
-											top: 0;
-										}
-										&:before
-										{
-											transform: translate(-150%, 0);
-										}
-										&:after
-										{
-											transform: translate(50%, 0);
-										}
-										*/
+
+										&[data-type="1"] span:before {background: url(assets/cote_type1.svg) 0 0 no-repeat;}
+										&[data-type="2"] span:before {background: url(assets/cote_type2.svg) 0 0 no-repeat;}
+										&[data-type="3"] span:before {background: url(assets/cote_type3.svg) 0 0 no-repeat;}
+										&[data-type="4"] span:before {background: url(assets/cote_type4.svg) 0 0 no-repeat;}
+										&[data-type="5"] span:before {background: url(assets/cote_type5.svg) 0 0 no-repeat;}
 									}
 			
-									&[data-type="1"] span:before {background: url(assets/cote_type1.svg) 0 -1px no-repeat;}
-									&[data-type="2"] span:before {background: url(assets/cote_type2.svg) 0 -1px no-repeat;}
-									&[data-type="3"] span:before {background: url(assets/cote_type3.svg) 0 -1px no-repeat;}
-									&[data-type="4"] span:before {background: url(assets/cote_type4.svg) 0 -1px no-repeat;}
-									&[data-type="5"] span:before {background: url(assets/cote_type5.svg) 0 -1px no-repeat;}
 			
-									&.d span {rotate: 90deg;}
-									&.b span {rotate: 180deg;}
-									&.g span {rotate: 270deg;}
+									&.h span 
+									{
+										margin-top: @mrgCote;
+									}
+									&.b span
+									{
+										&:before {rotate: 180deg;}
+									}
+									&.d span
+									{
+										&:before {rotate: 180deg;}
+									}
+									&.g span
+									{
+										margin-left: @mrgCote;
+									}
 								}
 			
 								&.zconf
 								{
-									width: @wcold - 2*@wcoin - 35px;
+									width: @coteW;
 									height: @coteW;
-									flex: 1 0 (@wcold - 2*@wcoin - 35px);
+									flex: 1 0 (@coteW);
 			
 								}
 							}

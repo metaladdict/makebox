@@ -66,34 +66,72 @@
 		{
 			var def = {
 				'type': 'quad', 'x' : 0, 'y' : 0, 'w' : 100, 'h' : 50, 
-				'dtls':	"11111111", 'dlta': [0,0,0,0],
+				'cotes':	"1111", 'dlta': [0,0,0,0],
 			};
 			conf = $.extend({}, def, req);
-			dtlsX = conf.dtls.split('');
+			conf.coins = p.recreerCoins(conf.cotes);
 
-			var configurateur = $('<div class="element"></div>');
-			$('<div data-type="'+dtlsX[0]+'" class="coin hg"><span></span></div>').appendTo(configurateur);
-			$('<div data-type="'+dtlsX[1]+'" class="cote h"><span></span></div>').appendTo(configurateur);
-			$('<div data-type="'+dtlsX[2]+'" class="coin hd"><span></span></div>').appendTo(configurateur);
-			$('<div data-type="'+dtlsX[7]+'" class="cote g"><span></span></div>').appendTo(configurateur);
+			var configurateur = $('<div class="element" data-cotes="'+conf.cotes+'"></div>');
+			$('<div data-type="'+conf.coins[0]+'" class="coin hg"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+conf.cotes[0]+'" class="cote h"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+conf.coins[1]+'" class="coin hd"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+conf.cotes[3]+'" class="cote g"><span></span></div>').appendTo(configurateur);
 			$('<div class="zconf"></div>').appendTo(configurateur);
-			$('<div data-type="'+dtlsX[3]+'" class="cote d"><span></span></div>').appendTo(configurateur);
-			$('<div data-type="'+dtlsX[6]+'" class="coin bg"><span></span></div>').appendTo(configurateur);
-			$('<div data-type="'+dtlsX[5]+'" class="cote b"><span></span></div>').appendTo(configurateur);
-			$('<div data-type="'+dtlsX[4]+'" class="coin bd"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+conf.cotes[1]+'" class="cote d"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+conf.coins[3]+'" class="coin bg"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+conf.cotes[2]+'" class="cote b"><span></span></div>').appendTo(configurateur);
+			$('<div data-type="'+conf.coins[2]+'" class="coin bd"><span></span></div>').appendTo(configurateur);
 			
 			p.set.elmRoot.append(configurateur);
 		}
 
+		p.recreerCoins = function(c)
+		{
+			coins = "";
+
+			for(i=0; i<=3; i++)
+			{
+				duo = ((i==0)?c[3]:c[i-1])+''+c[i]; //création d'une chaine des cote précédents et suivants
+				if(duo=='11' || duo=='13' || duo=='41' || duo=='43')
+				{coins+='1';}
+				else if(duo=='51' || duo=='53' || duo=='21' || duo=='23' || duo=='31' || duo=='33')
+				{coins+='2';}
+				else if(duo=='52' || duo=='54' || duo=='55' || duo=='22' || duo=='24' || duo=='25' || duo=='32' || duo=='34' || duo=='35')
+				{coins+='3';}
+				else if(duo=='12' || duo=='14' || duo=='15' || duo=='42' || duo=='44' || duo=='45')
+				{coins+='4';}
+			}
+
+			return coins;
+		}
+
+		p.refreshElements = function(el)
+		{
+			console.log(el.find('.h').attr('data-type'));
+			cotes = el.find('.h').attr('data-type');
+			cotes+= el.find('.d').attr('data-type');
+			cotes+= el.find('.b').attr('data-type');
+			cotes+= el.find('.g').attr('data-type');
+			coins = p.recreerCoins(cotes);
+			el.find('.hg').attr('data-type', coins[0]);
+			el.find('.hd').attr('data-type', coins[1]);
+			el.find('.bd').attr('data-type', coins[2]);
+			el.find('.bg').attr('data-type', coins[3]);
+			console.log(cotes);
+			console.log(coins);
+		}
+		/*
 		p.transmuterCoin = function(e)
 		{
 			tp = parseInt($(e.currentTarget).attr('data-type'));
 			$(e.currentTarget).attr('data-type', (tp>=4) ? 1 : tp+1);
 		}
+		*/
 		p.transmuterCote = function(e)
 		{
 			tp = parseInt($(e.currentTarget).attr('data-type'));
 			$(e.currentTarget).attr('data-type', (tp>=5) ? 1 : tp+1);
+			p.refreshElements($(e.currentTarget).parents('.element'));
 		}
 
 		/**********************************************************/
@@ -106,7 +144,7 @@
 			p.set.btnDown.click(p.downloadSVG);
 			p.set.zonechps.find('input').on('change', p.updateSVGView);
 
-			p.set.elmRoot.on('click', '.coin', p.transmuterCoin);
+			//p.set.elmRoot.on('click', '.coin', p.transmuterCoin);
 			p.set.elmRoot.on('click', '.cote', p.transmuterCote);
 		}
 		/**
