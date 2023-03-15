@@ -59,8 +59,9 @@ body
 					{
 						background-color: #cbded2;
 						border-top: 1px solid #888;
-						label:after {background-color: #bbddbb;}
+						label:after {background-color: #669966;}
 						padding: 5px 10px;
+						margin-top: 5px;
 			
 						.element
 						{
@@ -221,6 +222,36 @@ body
 									width: @coteW;
 									height: @coteW;
 									flex: 1 0 (@coteW);
+									padding: 10px;
+
+									> div
+									{
+										> strong
+										{
+											font-size: 11px;
+											display: block;
+											margin-top: 5px;
+										}
+
+										&.btnlst
+										{
+											text-align: right;
+											
+											a
+											{
+												display: inline-block;
+												margin: 1px 4px;
+												background-color: #4d1056;
+												font-size: 9px;
+												color: #fff;
+												text-decoration: none;
+												padding: 2px 4px;
+												border-radius: 3px;
+												width: 25px;
+												text-align: center;
+											}
+										}
+									}
 			
 								}
 							}
@@ -261,10 +292,11 @@ body
 				{
 					display: block;
 					width: 100%;
-					padding: 4px 4px;
+					padding: 2px 4px;
 					border: 1px solid #999;
 					border-radius: 5px;
-					margin-bottom: 3px;
+					margin-bottom: 1px;
+					font-size: 12px;
 				}
 				&:after
 				{
@@ -275,16 +307,23 @@ body
 					pointer-events: none;
 					background-color: #56046b;
 					color:#fff;
-					padding: 4px 6px;
+					padding: 4px 2px;
 					content: attr(data-placeholder);
-					font-size: 8px;
-					border-radius: 5px;
+					font-size: 9px;
+					border-radius: 0 5px 5px 0;
 				}
 
 				&.ischeck
 				{
 					&:after {position: static; margin-left: 5px;}
 				}
+			}
+
+			.quadri label
+			{
+				width: 24%;
+				margin-left: 1%;
+				&:nth-of-type(4n+1) {margin-left: 0;}
 			}
 		}
 		.document label:after {background-color: #56046b;}
