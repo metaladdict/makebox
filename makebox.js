@@ -12,11 +12,11 @@
 	{
 		var def = 
 		{
-			docw:					100,
-			doch: 				100,
+			docw:					200,
+			doch: 				200,
 
 			espaisseur: 	3,
-			brulage: 			.1,
+			brulage: 			.2,
 			strkwdth: 		.2,
 			mrgzone: 			2,
 
@@ -42,7 +42,7 @@
 			p.creerInterface();
 			p.creerActions();
 
-			p.creerElement({cotes:'1111'});
+			p.creerElement({cotes:'1234', y:20, x:20, w:50, h:50});
 		}
 
 
@@ -85,7 +85,7 @@
 					var cmd = ['M ' + (p0[0] - p.set.brulage) + ',' + (p0[1] - p.set.brulage + p.set.espaisseur),];
 				break;
 			}
-
+			
 			for(cote=0; cote<4; cote++)
 			{
 				var obj = {
@@ -144,22 +144,25 @@
 				var crans = Math.floor(Math.abs(cnf.w)/p.set.wcrans);
 				if((cnf.type<=2 && p.isEven(crans)) || (cnf.type>=3 && p.isOdd(crans))) {crans++;}
 				wcrans = cnf.w/crans;
+
+				
 	
 				for(i=1; i<=crans; i++)
 				{
 					//coté adjacent up
 					if(i==1)
-					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (cnf.sides[0] * p.set.espaisseur) + cnf.delta[0])));}
+					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (cnf.sides[0] * p.set.espaisseur) + cnf.delta[0] + p.set.brulage + (dir * p.set.brulage))));}
 					else if(i==crans)
-					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (cnf.sides[1] * p.set.espaisseur) + cnf.delta[1])));}
+					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (cnf.sides[1] * p.set.espaisseur) + cnf.delta[1] + p.set.brulage + (dir * p.set.brulage))));}
 					else
 					{
-						cmd.push(cld[0] +' '+ (mlt.x * wcrans));
+						console.log(dir);
+						cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (2 * dir * p.set.brulage))));
 					}
 			
 					if(i<crans)
 					{
-						cmd.push(cld[1] +' '+ (mlt.y * dir * p.set.espaisseur));
+						cmd.push(cld[1] +' '+ ((mlt.y * dir * p.set.espaisseur)));
 						dir*=-1;
 					}
 				}
@@ -295,7 +298,7 @@
 		p.creerElement = function(req)
 		{
 			var def = {
-				'type': 'quad', 'x' : 0, 'y' : 0, 'w' : 75, 'h' : 40, 
+				'type': 'quad', 'x' : 0, 'y' : 0, 'w' : 50, 'h' : 50, 
 				'cotes':	"1111", 'dlta': [0,0,0,0], "id" : 'elm'+p.uid(), 'kp':[0,0,0,0,0,0,0,0]
 			};
 			var blockConf = $.extend({}, def, req);
