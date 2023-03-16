@@ -135,7 +135,7 @@
 			if(cnf.type=="5")
 			{
 				// plat
-				var wTot = cnf.w + (cnf.sides[0] * p.set.espaisseur) + (cnf.sides[1] * p.set.espaisseur) + cnf.delta[0] + cnf.delta[1];
+				var wTot = cnf.w + (cnf.sides[0] * p.set.espaisseur) + (cnf.sides[1] * p.set.espaisseur) + cnf.delta[0] + cnf.delta[1] + 2 * p.set.brulage;
 				cmd.push(cld[0] +' '+ (mlt.x * wTot));
 			}
 			else
