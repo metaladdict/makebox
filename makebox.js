@@ -42,26 +42,48 @@
 			p.creerInterface();
 			p.creerActions();
 
-			p.creerElement();
+			p.creerElement({cotes:'1111'});
 		}
-		
 
 
 		p.uploadConf = function()
 		{
 			console.log('Charger une configuration');
+			return false;
 		}
 		p.downloadConf = function()
 		{
 			console.log('Télécharger une configuration');
+			return false;
 		}
 		p.downloadSVG = function()
 		{
 			console.log('Téléchaerger le SVG');
+			var element = document.createElement('a');
+			text = document.querySelector('svg').outerHTML;
+			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + text);
+			element.setAttribute('download', 'plan.svg');
+		
+			element.style.display = 'none';
+			document.body.appendChild(element);
+		
+			element.click();
+		
+			document.body.removeChild(element);
+			return false;
 		}
+
+
 		p.updateSVGView = function()
 		{
 			$('#preview *').remove();
+			$('#preview').attr({
+			"width"						:	p.set.docw+"mm",
+			"height"					:	p.set.doch+"mm",
+			"viewBox"					:	"0 0 "+p.set.docw+" "+p.set.doch,
+			"stroke-width"		:	p.set.strkwdth
+			});
+			
 			$.each(p.set.listElms, function(id,elm){
 				p.fabriquerPiece(id, elm);
 			});
@@ -76,10 +98,7 @@
 			switch(dts.coins[0])
 			{
 				case "1":
-					var cmd = [
-						'M ' + (p0[0] - p.set.brulage) + ',' + (p0[1] - p.set.brulage),
-						'h '  + p.set.espaisseur
-					];
+					var cmd = ['M ' + (p0[0] - p.set.brulage) + ',' + (p0[1] - p.set.brulage),];
 				break;
 				case "2":
 					var cmd = ['M ' + (p0[0] - p.set.brulage + p.set.espaisseur) + ',' + (p0[1] - p.set.brulage)];
@@ -88,10 +107,7 @@
 					var cmd = ['M ' + (p0[0] - p.set.brulage + p.set.espaisseur) + ',' + (p0[1] - p.set.brulage + p.set.espaisseur)];
 				break;
 				case "4":
-					var cmd = [
-						'M ' + (p0[0] - p.set.brulage) + ',' + (p0[1] - p.set.brulage + p.set.espaisseur),
-						'h '  + p.set.espaisseur
-					];
+					var cmd = ['M ' + (p0[0] - p.set.brulage) + ',' + (p0[1] - p.set.brulage + p.set.espaisseur),];
 				break;
 			}
 
@@ -99,12 +115,19 @@
 			{
 				var obj = {
 					w: 			(p.isEven(cote) ? dts.w : dts.h), 
-					sens: 	cote, 
-					type: 	dts.cotes[cote], 
-					delta: 	dts.dlta[cote]
+					sens:			cote, 
+					type:			dts.cotes[cote], 
+					sides:		[
+						(dts.coins[cote]=="1" || dts.coins[cote]=="4") ? 1 : 0, 
+						((parseInt(dts.coins[(cote+1)%4])+1)%4>1) ? 1 : 0
+					], // 1ou4 / 1ou2
+					delta:		[
+						parseFloat(dts.dlta[(cote+3)%4]),
+						parseFloat(dts.dlta[(cote+1)%4])
+					],
 				};
-				console.log(p.creerLigneCrantee(obj));
-				cmd.push(p.creerLigneCrantee(obj));
+				
+				cmd.push(p.creerLigneDecoupe(obj));
 			}
 			
 			p.drawIt(cmd, id);
@@ -121,16 +144,19 @@
 		p.creerElement = function(req)
 		{
 			var def = {
-				'type': 'quad', 'x' : 0, 'y' : 0, 'w' : 50, 'h' : 50, 
+				'type': 'quad', 'x' : 0, 'y' : 0, 'w' : 75, 'h' : 40, 
 				'cotes':	"1111", 'dlta': [0,0,0,0], "id" : 'elm'+p.uid(), 'kp':[0,0,0,0,0,0,0,0]
 			};
 			var blockConf = $.extend({}, def, req);
 			blockConf.coins = p.recreerCoins(blockConf.cotes);
 			var zconf = $('<div class="zconf"></div>');
-			$('<div class="btnlst"></div>').prepend('<a href="#">X</a>').click(p.killMe).prepend('<a href="#">+1</a>').click(p.copyMe).appendTo(zconf);
+			var btnlst = $('<div class="btnlst"></div>').appendTo(zconf);
+			$('<a href="#">X</a>').click(p.killMe).appendTo(btnlst);
+			$('<a href="#">+1</a>').click(p.copyMe).appendTo(btnlst);
+
 			p.creerFieldSet('base',JSON.parse('[["w","Larg.", '+blockConf.w+'],["h","Haut.", '+blockConf.h+'],["x","X", '+blockConf.x+'],["y","Y", '+blockConf.y+']]')).addClass('quadri').appendTo(zconf);
-			p.creerFieldSet('dlta',JSON.parse('[["dlta.0","haut", '+blockConf.dlta[0]+'],["dlta.1","droite", '+blockConf.dlta[1]+'],["dlta.2","bas", '+blockConf.dlta[2]+'],["dlta.3","gauche", '+blockConf.dlta[3]+']]')).addClass('quadri').prepend('<strong>Décalage</strong>').appendTo(zconf);
-			p.creerFieldSet('dkp1',JSON.parse('[["kp.0","haut", '+blockConf.kp[0]+'],["kp.1","droite", '+blockConf.kp[1]+'],["kp.2","bas", '+blockConf.kp[2]+'],["kp.3","gauche", '+blockConf.kp[3]+'],["kp.4","haut", '+blockConf.kp[0]+'],["kp.5","droite", '+blockConf.kp[1]+'],["kp.6","bas", '+blockConf.kp[2]+'],["kp.7","gauche", '+blockConf.kp[3]+']]')).addClass('quadri').prepend('<strong>Découpe delta / arrondi</strong>').appendTo(zconf);
+			p.creerFieldSet('dlta',JSON.parse('[["dlta.0","⮝", '+blockConf.dlta[0]+'],["dlta.1","⮞", '+blockConf.dlta[1]+'],["dlta.2","⮟", '+blockConf.dlta[2]+'],["dlta.3","⮜", '+blockConf.dlta[3]+']]')).addClass('quadri').prepend('<strong>Décalage</strong>').appendTo(zconf);
+			p.creerFieldSet('dkp1',JSON.parse('[["kp.0","⮝", '+blockConf.kp[0]+'],["kp.1","⮞", '+blockConf.kp[1]+'],["kp.2","⮟", '+blockConf.kp[2]+'],["kp.3","⮜", '+blockConf.kp[3]+'],["kp.4","⮝", '+blockConf.kp[0]+'],["kp.5","⮞", '+blockConf.kp[1]+'],["kp.6","⮟", '+blockConf.kp[2]+'],["kp.7","⮜", '+blockConf.kp[3]+']]')).addClass('quadri').prepend('<strong>Découpe delta / arrondi</strong>').appendTo(zconf);
 
 
 			var configurateur = $('<div class="element" data-cotes="'+blockConf.cotes+'" id="'+blockConf.id+'"></div>');
@@ -145,7 +171,7 @@
 			$('<div data-type="'+blockConf.coins[2]+'" class="coin bd"><span></span></div>').appendTo(configurateur);
 			
 			p.set.listElms[blockConf.id] = blockConf;
-			p.set.elmRoot.append(configurateur);
+			p.set.zoneElms.append(configurateur);
 
 			p.updateSVGView();
 		}
@@ -198,44 +224,60 @@
 
 		p.killMe = function(e)
 		{
-
+			var elmID = $(e.currentTarget).parents('.element').attr('id');
+			delete p.set.listElms[elmID];
+			p.set.zoneElms.find('.element#'+elmID).remove();
 
 			p.updateSVGView();
+			return false;
 		}
 
 		p.copyMe = function(e)
 		{
+			var elmID = $(e.currentTarget).parents('.element').attr('id');
+			var newObj = p.set.listElms[elmID];
+			//console.log(newObj);
+			delete newObj.id;
+			p.creerElement(newObj);
 
 
 			p.updateSVGView();
+			return false;
+		}
+		p.addOne = function(e)
+		{
+			p.creerElement({});
+			return false;
 		}
 
 		/**********************************************************/
 		/*												 SETUP 													*/
 		/**********************************************************/
+		p.bazDataChanged = function(e)
+		{
+			var fld = $(e.currentTarget);
+			var k = (fld.attr('id').includes('.')) ? fld.attr('id').split('.') : fld.attr('id');
+			var newV = (isNaN(fld.val())) ? fld.val() : parseFloat(fld.val());
+			if(Array.isArray(k))
+			{p.set[k[0]][k[1]] = newV;}
+			else
+			{p.set[k] = newV;}
+
+			p.updateSVGView();
+		}
+
 		p.elmDataChanged = function(e)
 		{
 			var fld = $(e.currentTarget);
 			var elmID = fld.parents('.element').attr('id');
 			var k = (fld.attr('id').includes('.')) ? fld.attr('id').split('.') : fld.attr('id');
+			var newV = (isNaN(fld.val())) ? fld.val() : parseFloat(fld.val());
 			if(Array.isArray(k))
-			{p.set.listElms[elmID][k[0]][k[1]] = fld.val();}
+			{p.set.listElms[elmID][k[0]][k[1]] = newV;}
 			else
-			{p.set.listElms[elmID][k] = fld.val();}
+			{p.set.listElms[elmID][k] = newV;}
 
 			p.updateSVGView();
-		}
-
-		p.creerActions = function()
-		{
-			p.set.btnLoad.click(p.uploadConf);
-			p.set.btnSave.click(p.downloadConf);
-			p.set.btnDown.click(p.downloadSVG);
-			p.set.zonechps.find('input').on('change', p.updateSVGView);
-
-			//p.set.elmRoot.on('click', '.coin', p.transmuterCoin);
-			p.set.elmRoot.on('click', '.cote', p.transmuterCote);
-			p.set.elmRoot.on('change', 'input', p.elmDataChanged);
 		}
 
 
@@ -264,7 +306,6 @@
 					["autocrop",		"Recadrer doc", p.set.autocrop, "checkbox"],
 					["autopos",		"Repositionnement doc", p.set.autocrop, "checkbox"]
 				],
-				"listeelm": []
 			};
 			
 			// vue
@@ -281,24 +322,39 @@
 			//champs
 			var cnf = $('<section class="conf"></section>');
 			p.set.zonechps = $('<div class="areachp"></div>');
+			p.set.zoneBase = $('<div class="baseparams"></div>').appendTo(p.set.zonechps);
+			p.set.zoneElms = $('<div class="listeelm"></div>').appendTo(p.set.zonechps);
 			
 			$.each(chp, function(k,l){
-				p.creerFieldSet(k,l).appendTo(p.set.zonechps);
+				p.creerFieldSet(k,l).appendTo(p.set.zoneBase);
 			});
 			
 			p.set.zonechps.appendTo(cnf);
 			
 			//boutons
 			var zonebtn = $('<div class="areabtn"></div>');
-			p.set.btnLoad = $('<a href="#" class="loader">🗳 Charger</a>').appendTo(zonebtn);
-			p.set.btnSave = $('<a href="#" class="saver">📦 Sauvegarder</a>').appendTo(zonebtn);
-			p.set.btnDown = $('<a href="#" class="dwnld">📋 Télécharger</a>').appendTo(zonebtn);
+			p.set.addOne = $('<a href="#" class="addone">Ajouter</a>').appendTo(zonebtn);
+			p.set.btnLoad = $('<a href="#" class="loader">Charger</a>').appendTo(zonebtn);
+			p.set.btnSave = $('<a href="#" class="saver">Sauvegarder</a>').appendTo(zonebtn);
+			p.set.btnDown = $('<a href="#" class="dwnld">Télécharger</a>').appendTo(zonebtn);
 			
 			zonebtn.appendTo(cnf);
-
-			p.set.elmRoot = cnf.find('.listeelm');
 			
 			cnf.appendTo($elm);
+		}
+
+		p.creerActions = function()
+		{
+			p.set.addOne.click(p.addOne);
+			p.set.btnLoad.click(p.uploadConf);
+			p.set.btnSave.click(p.downloadConf);
+			p.set.btnDown.click(p.downloadSVG);
+			p.set.zonechps.find('input').on('change', p.updateSVGView);
+
+			//p.set.zoneElms.on('click', '.coin', p.transmuterCoin);
+			p.set.zoneElms.on('click', '.cote', p.transmuterCote);
+			p.set.zoneElms.on('change', 'input', p.elmDataChanged);
+			p.set.zoneBase.on('change', 'input', p.bazDataChanged);
 		}
 
 		
@@ -306,39 +362,52 @@
 		/*												 UTILS 													*/
 		/**********************************************************/
 
-		p.creerLigneCrantee = function(req)
+		p.creerLigneDecoupe = function(req)
 		{
-			def = {w: 50, sens: 0, type:1, delta: 0};
+			def = {w: 50, sens: 0, type:1, delta: 0, sides: [0,0]};
 			var cnf = $.extend({}, def, req);
-			console.log(cnf);
+			//console.log(cnf);
 			cmd = [];
 
-			var crans = Math.floor(Math.abs(cnf.w)/p.set.wcrans);
-			if((cnf.type<=2 && p.isOdd(crans)) || (cnf.type>=3 && p.isEven(crans))) {crans++;}
-			wcrans = cnf.w/crans;
+			// sélection de la progression de découpe : horizontal/vertical, xy/yx et direction
 			cld = p.isEven(cnf.sens) ? 'hv' : 'vh';
 			dir = (p.isEven(cnf.type)) ? -1 : 1;
 			mlt = {
 				x: (cnf.sens<2) ? 1 : -1,
-				y: (cnf.sens<=2) ? 1 : -1
+				y: (cnf.sens==1 || cnf.sens==2) ? -1 : 1
 			};
 
-			for(i=1; i<=crans; i++)
+
+			if(cnf.type=="5")
 			{
-				//coté adjacent up
-				if(i==1)
-				{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + cnf.delta)));}
-				else if(i==crans)
-				{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + cnf.delta)));}
-				else
+				// plat
+				var wTot = cnf.w + (cnf.sides[0] * p.set.espaisseur) + (cnf.sides[1] * p.set.espaisseur) + cnf.delta[0] + cnf.delta[1];
+				cmd.push(cld[0] +' '+ (mlt.x * wTot));
+			}
+			else
+			{
+				// cranté
+				var crans = Math.floor(Math.abs(cnf.w)/p.set.wcrans);
+				if((cnf.type<=2 && p.isEven(crans)) || (cnf.type>=3 && p.isOdd(crans))) {crans++;}
+				wcrans = cnf.w/crans;
+	
+				for(i=1; i<=crans; i++)
 				{
-					cmd.push(cld[0] +' '+ (mlt.x * wcrans));
-				}
-		
-				if(i<crans)
-				{
-					cmd.push(cld[1] +' '+ (mlt.y * dir * p.set.espaisseur));
-					dir*=-1;
+					//coté adjacent up
+					if(i==1)
+					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (cnf.sides[0] * p.set.espaisseur) + cnf.delta[0])));}
+					else if(i==crans)
+					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (cnf.sides[1] * p.set.espaisseur) + cnf.delta[1])));}
+					else
+					{
+						cmd.push(cld[0] +' '+ (mlt.x * wcrans));
+					}
+			
+					if(i<crans)
+					{
+						cmd.push(cld[1] +' '+ (mlt.y * dir * p.set.espaisseur));
+						dir*=-1;
+					}
 				}
 			}
 			
