@@ -176,7 +176,6 @@
 				}
 				else
 				{
-					console.log("GO !");
 					var mvTo = [
 						(hv=='h') ? (dr[0]*p.lngTracer(l, debord[0], 0, debord[2], 0)) : 0,
 						(hv=='h') ? 0 : (dr[0]*p.lngTracer(l, debord[0], 0, debord[2], 0))
@@ -190,8 +189,6 @@
 
 		p.lngTracer = function(l, reculg, courbeg, reculd, courbed)
 		{
-			console.log("G " + reculg+" - "+((reculg>0) ? '>0' : 'ignoré !'));
-			console.log("D " + reculd+" - "+((reculd>0) ? '>0' : 'ignoré !'));
 			return l - ((reculg>0) ? reculg + courbeg : 0) - ((reculd>0) ? reculd + courbed : 0);
 		}
 

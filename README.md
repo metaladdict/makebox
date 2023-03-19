@@ -12,11 +12,13 @@ Permet de générer/télécharger le SVG à la volée.
 ## :scissors: Système de découpe
 - [x] paramètres de base
 - [x] configuration des coins/cotés
-- [~] création d'un élement (reste positionnement automatique)
+- [ ] création d'un élement (reste positionnement automatique)
 - [ ] création d'un ensemble d'éléments
 - [ ] selecteur d'ensembles
 - [ ] charger / sauvegarder
 - [x] télécharger le SVG
+- [ ] ajouter un SVCG interne
+- [ ] choix de la couleur de tracé
 
 ## :bulb: A ajouter
 - [x] test de découpe
@@ -30,5 +32,8 @@ Permet de générer/télécharger le SVG à la volée.
    :pencil2: Prendre en compte la largeur de coupe
 - `13/03` refonte du système  
    les boites pourront répondre à des modèles, plusieurs étapes sont ajoutées
-- `15/03` refonte du système  
+- `15/03` tracés  
    tracé des cotés selon option, activation des décalages
+- `19/03` tracés  
+   placement du tracé dans un groupe  
+   ajout du décalage intérieur et des courbures
