@@ -12,17 +12,15 @@
 	{
 		var def = 
 		{
-			docw:					200,
-			doch: 				200,
+			docw:					400,
+			doch: 				400,
 
 			espaisseur: 	3,
-			brulage: 			.2,
+			brulage: 			.05,
 			strkwdth: 		.2,
 			mrgzone: 			2,
 
 			wcrans: 			10,
-			courbure: 		5,
-			decalcourbe: 	3,
 			autocrop: 		true,
 			autopos: 			true,
 
@@ -42,7 +40,8 @@
 			p.creerInterface();
 			p.creerActions();
 
-			p.creerElement({cotes:'1234', y:20, x:20, w:50, h:50});
+			//p.creerElement({cotes:'1111', y:20, x:50, w:200, h:150, kp:[10,10,10,10,-10,-10,-10,-10]});
+			p.creerElement({cotes:'1111', y:20, x:50, w:200, h:150, kp:[10,10,0,10,10,10,0,0]});
 		}
 
 
@@ -69,23 +68,33 @@
 			var p0 = [
 				p.set.p0[0] + p.set.mrgzone + dts.x,
 				p.set.p0[1] + p.set.mrgzone + dts.y
-			]
+			];
+			var groupAttr = {
+				fill: 	"transparent",
+				stroke:	"black",
+				id:			id
+			};
 			switch(dts.coins[0])
 			{
 				case "1":
-					var cmd = ['M ' + (p0[0] - p.set.brulage) + ',' + (p0[1] - p.set.brulage),];
+					groupAttr.transform = 'translate('+(p0[0] - p.set.brulage)+','+(p0[1] - p.set.brulage)+')';
 				break;
 				case "2":
-					var cmd = ['M ' + (p0[0] - p.set.brulage + p.set.espaisseur) + ',' + (p0[1] - p.set.brulage)];
+					groupAttr.transform = 'translate('+(p0[0] - p.set.brulage + p.set.espaisseur)+','+(p0[1] - p.set.brulage)+')';
 				break;
 				case "3":
-					var cmd = ['M ' + (p0[0] - p.set.brulage + p.set.espaisseur) + ',' + (p0[1] - p.set.brulage + p.set.espaisseur)];
+					groupAttr.transform = 'translate('+(p0[0] - p.set.brulage + p.set.espaisseur)+','+(p0[1] - p.set.brulage + p.set.espaisseur)+')';
 				break;
 				case "4":
-					var cmd = ['M ' + (p0[0] - p.set.brulage) + ',' + (p0[1] - p.set.brulage + p.set.espaisseur),];
+					groupAttr.transform = 'translate('+(p0[0] - p.set.brulage)+','+(p0[1] - p.set.brulage + p.set.espaisseur)+')';
 				break;
 			}
+
+			var grp = $('<g></g>');
+			grp.attr(groupAttr);
 			
+			//Elément principal
+			var cmd = ["m 0,0"];
 			for(cote=0; cote<4; cote++)
 			{
 				var obj = {
@@ -104,16 +113,86 @@
 				
 				cmd.push(p.creerLigneDecoupe(obj));
 			}
+
+			$('<path d="'+cmd.join(' ')+'" />').appendTo(grp);
 			
-			p.drawIt(cmd, id);
+			//Découpe supplémentaire
+			if(dts.kp.join('')!='00000000')
+			{
+				cmd = p.decoupeAdditionnelle(dts.kp, dts.w, dts.h);
+				$('<path d="'+cmd.join(' ')+'" />').appendTo(grp);
+			}
+
+			grp.appendTo(p.set.svg);
+			document.getElementById("preview").innerHTML += "";
 			
 		}
 
-		p.drawIt = function(cmd, id)
+
+		p.decoupeAdditionnelle = function(req, w, h)
 		{
-			var elm = $('<path d="'+cmd.join(' ')+'" fill="transparent" stroke="black" id="'+id+'" />');
-			elm.appendTo(p.set.svg);
-			document.getElementById("preview").innerHTML += "";
+			var p0 = [
+				p.set.p0[0] + Math.abs(req[3]) + p.set.brulage,
+				p.set.p0[1] + ((Math.abs(req[0])>0) ? (Math.abs(req[0]) + Math.abs(req[4])) : 0 )+ p.set.brulage
+
+			]
+			var cmd = ['m '+p0[0]+','+p0[1]+''];
+			for(cur=0; cur<4; cur++)
+			{
+				var debord = [
+					req[(cur+3)%4],
+					req[cur],
+					req[(cur+1)%4]
+				];
+				var crv = [
+					Math.abs(req[cur+4]),
+					Math.abs(req[4+((cur+1)%4)])
+				];
+				
+				var l = (p.isEven(cur) ? w : h) + 2*p.set.espaisseur; //longueur totale sur l'axe
+
+				var hv = (p.isEven(cur)) ? 'h' : 'v'; //avancement horizontal ou vertical
+				var dr = [(cur<2) ? 1:-1, ((cur%3)-1)<0 ? -1 : 1]; //progression pos/neg sur axes principal/secondaire
+
+				if(debord[1]>0)
+				{
+					if(debord[0]>0 && crv[0]>0)
+					{
+						drB = dr.slice();
+						drB = (req[cur+4]<0) ? drB.reverse() : drB;
+						var pts = [
+							(hv=='h') ? ['0',(drB[1]*crv[0])] : [(drB[1]*crv[0]),'0'],
+							(hv=='h') ? [(drB[0]*crv[0]),(drB[1]*crv[0])] : [(drB[1]*crv[0]),(drB[0]*crv[0])]
+						];
+						if(req[cur+4]<0)
+						{
+							//courbure inversée
+							pts[0] = pts[0].reverse();
+							pts[1] = pts[1].reverse();
+						}
+						cmd.push('q '+pts[0]+' '+pts[1]);
+					}
+					cmd.push(hv+' '+(dr[0]*p.lngTracer(l, debord[0], crv[0], debord[2], crv[1])));
+				}
+				else
+				{
+					console.log("GO !");
+					var mvTo = [
+						(hv=='h') ? (dr[0]*p.lngTracer(l, debord[0], 0, debord[2], 0)) : 0,
+						(hv=='h') ? 0 : (dr[0]*p.lngTracer(l, debord[0], 0, debord[2], 0))
+					];
+					cmd.push('m '+mvTo[0], mvTo[1]);
+				}
+			}
+
+			return cmd;
+		}
+
+		p.lngTracer = function(l, reculg, courbeg, reculd, courbed)
+		{
+			console.log("G " + reculg+" - "+((reculg>0) ? '>0' : 'ignoré !'));
+			console.log("D " + reculd+" - "+((reculd>0) ? '>0' : 'ignoré !'));
+			return l - ((reculg>0) ? reculg + courbeg : 0) - ((reculd>0) ? reculd + courbed : 0);
 		}
 
 		p.creerLigneDecoupe = function(req)
@@ -144,8 +223,6 @@
 				var crans = Math.floor(Math.abs(cnf.w)/p.set.wcrans);
 				if((cnf.type<=2 && p.isEven(crans)) || (cnf.type>=3 && p.isOdd(crans))) {crans++;}
 				wcrans = cnf.w/crans;
-
-				
 	
 				for(i=1; i<=crans; i++)
 				{
@@ -155,10 +232,7 @@
 					else if(i==crans)
 					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (cnf.sides[1] * p.set.espaisseur) + cnf.delta[1] + p.set.brulage + (dir * p.set.brulage))));}
 					else
-					{
-						console.log(dir);
-						cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (2 * dir * p.set.brulage))));
-					}
+					{cmd.push(cld[0] +' '+ (mlt.x * (wcrans + (2 * dir * p.set.brulage))));}
 			
 					if(i<crans)
 					{
@@ -245,14 +319,14 @@
 				],
 				"bois":	[
 					["espaisseur",	"Epaisseur du bois", p.set.espaisseur],
-					["brulage",			"Compensation brûlage", p.set.brulage],
+					["brulage",			"Brûlage", p.set.brulage],
 					["strkwdth",		"Epaisseur de trait", p.set.strkwdth],
 					["mrgzone",			"Marge de base", p.set.mrgzone],
 				],
 				"dessin": [
 					["wcrans",			"Largeur des crans", p.set.wcrans],
-					["courbure",		"Courbe couvercle", p.set.courbure],
-					["decalcourbe",	"Débord blocage couvercle", p.set.decalcourbe],
+					//["courbure",		"Courbe couvercle", p.set.courbure],
+					//["decalcourbe",	"Débord blocage couvercle", p.set.decalcourbe],
 				],
 				"options": [
 					["autocrop",		"Recadrer doc", p.set.autocrop, "checkbox"],
@@ -307,10 +381,12 @@
 			var btnlst = $('<div class="btnlst"></div>').appendTo(zconf);
 			$('<a href="#">X</a>').click(p.killMe).appendTo(btnlst);
 			$('<a href="#">+1</a>').click(p.copyMe).appendTo(btnlst);
+			
 
-			p.creerFieldSet('base',JSON.parse('[["w","Larg.", '+blockConf.w+'],["h","Haut.", '+blockConf.h+'],["x","X", '+blockConf.x+'],["y","Y", '+blockConf.y+']]')).addClass('quadri').appendTo(zconf);
+			p.creerFieldSet('base',JSON.parse('[["w","L", '+blockConf.w+'],["h","H", '+blockConf.h+'],["x","X", '+blockConf.x+'],["y","Y", '+blockConf.y+']]')).addClass('quadri').appendTo(zconf);
 			p.creerFieldSet('dlta',JSON.parse('[["dlta.0","⮝", '+blockConf.dlta[0]+'],["dlta.1","⮞", '+blockConf.dlta[1]+'],["dlta.2","⮟", '+blockConf.dlta[2]+'],["dlta.3","⮜", '+blockConf.dlta[3]+']]')).addClass('quadri').prepend('<strong>Décalage</strong>').appendTo(zconf);
-			p.creerFieldSet('dkp1',JSON.parse('[["kp.0","⮝", '+blockConf.kp[0]+'],["kp.1","⮞", '+blockConf.kp[1]+'],["kp.2","⮟", '+blockConf.kp[2]+'],["kp.3","⮜", '+blockConf.kp[3]+'],["kp.4","⮝", '+blockConf.kp[0]+'],["kp.5","⮞", '+blockConf.kp[1]+'],["kp.6","⮟", '+blockConf.kp[2]+'],["kp.7","⮜", '+blockConf.kp[3]+']]')).addClass('quadri').prepend('<strong>Découpe delta / arrondi</strong>').appendTo(zconf);
+			p.creerFieldSet('dkp1',JSON.parse('[["kp.0","⮝", '+blockConf.kp[0]+'],["kp.1","⮞", '+blockConf.kp[1]+'],["kp.2","⮟", '+blockConf.kp[2]+'],["kp.3","⮜", '+blockConf.kp[3]+'],["kp.4","🢄", '+blockConf.kp[4]+'],["kp.5","🢅", '+blockConf.kp[5]+'],["kp.6","🢆", '+blockConf.kp[6]+'],["kp.7","🢇", '+blockConf.kp[7]+']]')).addClass('quadri').prepend('<strong>Découpe delta / arrondi</strong>').appendTo(zconf);
+			
 
 
 			var configurateur = $('<div class="element" data-cotes="'+blockConf.cotes+'" id="'+blockConf.id+'"></div>');
@@ -349,7 +425,7 @@
 					break;
 					default:
 						var fld = $('<label data-placeholder="'+f[1]+'" ><input id="'+f[0]+'" type="text"></label>');
-						if(typeof f[2] != undefined) {fld.find('input').val(f[2]);}
+						if(typeof f[2] != undefined) {fld.find('input').val(f[2]); }
 					break;
 				}
 				fld.appendTo(grp);
