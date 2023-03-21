@@ -12,7 +12,7 @@ Permet de générer/télécharger le SVG à la volée.
 ## :scissors: Système de découpe
 - [x] paramètres de base
 - [x] configuration des coins/cotés
-- [ ] création d'un élement (reste positionnement automatique)
+- [x] création d'un élement (reste positionnement automatique)
 - [ ] création d'un ensemble d'éléments
 - [ ] selecteur d'ensembles
 - [ ] charger / sauvegarder
@@ -28,12 +28,16 @@ Permet de générer/télécharger le SVG à la volée.
 - [ ] intercalaire amovibles
 
 ## :calendar: Historique
-- `08/03` test de coupe sur 2 pièces  
-   :pencil2: Prendre en compte la largeur de coupe
+- `21/03` activation de l'auto positionnement  
+   calcul de la prochaine position de bloc  
+   :exclamation: bug de positionnement du point 0 de la découpe, selon type de coté à corriger  
+- `19/03` tracés internes  
+   placement du tracé dans un groupe  
+   ajout du décalage intérieur et des courbures  
+- `15/03` tracés externe  
+   tracé des cotés selon option, activation des décalages
 - `13/03` refonte du système  
    les boites pourront répondre à des modèles, plusieurs étapes sont ajoutées
-- `15/03` tracés  
-   tracé des cotés selon option, activation des décalages
-- `19/03` tracés  
-   placement du tracé dans un groupe  
-   ajout du décalage intérieur et des courbures
+- `08/03` test de coupe sur 2 pièces  
+   :pencil2: Prendre en compte la largeur de coupe
+   

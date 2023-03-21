@@ -12,7 +12,7 @@
 	{
 		var def = 
 		{
-			docw:					400,
+			docw:					500,
 			doch: 				400,
 
 			espaisseur: 	3,
@@ -40,8 +40,9 @@
 			p.creerInterface();
 			p.creerActions();
 
-			//p.creerElement({cotes:'1111', y:20, x:50, w:200, h:150, kp:[10,10,10,10,-10,-10,-10,-10]});
-			p.creerElement({cotes:'1111', y:20, x:50, w:200, h:150, kp:[10,10,0,10,10,10,0,0]});
+			p.creerElement({cotes:'1111', w:180, h:150, kp:[10,10,10,10,-10,-10,-10,-10]});
+			p.creerElement({cotes:'1111', w:150, h:150, kp:[10,10,0,10,10,10,0,0]});
+			p.creerElement({cotes:'1111', w:200, h:150, kp:[140,90,0,90,10,10,0,0]});
 		}
 
 
@@ -57,8 +58,30 @@
 			"viewBox"					:	"0 0 "+p.set.docw+" "+p.set.doch,
 			"stroke-width"		:	p.set.strkwdth
 			});
+
+			let separ = 2*p.set.espaisseur + p.set.mrgzone;
+			let nextX = p.set.mrgzone;
+			let nextY = p.set.mrgzone;
+			let maxY = nextY;
 			
 			$.each(p.set.listElms, function(id,elm){
+				if(p.set.autopos === true)
+				{
+					if(nextX + elm.w >= p.set.docw)
+					{
+						nextX = p.set.mrgzone;
+						nextY = maxY;
+					}
+					elm = $.extend({}, elm, {x: nextX, y: nextY});
+					$('#'+id+' #x').val(elm.x);
+					$('#'+id+' #y').val(elm.y);
+					p.set.listElms[id].x = elm.x;
+					p.set.listElms[id].y = elm.y;
+					
+					nextX += elm.w + separ;
+					maxY = Math.max(maxY, nextY + elm.h + separ);
+				}
+
 				p.fabriquerPiece(id, elm);
 			});
 		}
@@ -125,7 +148,6 @@
 
 			grp.appendTo(p.set.svg);
 			document.getElementById("preview").innerHTML += "";
-			
 		}
 
 
@@ -326,8 +348,8 @@
 					//["decalcourbe",	"Débord blocage couvercle", p.set.decalcourbe],
 				],
 				"options": [
-					["autocrop",		"Recadrer doc", p.set.autocrop, "checkbox"],
-					["autopos",		"Repositionnement doc", p.set.autocrop, "checkbox"]
+					//["autocrop",		"Recadrer doc", p.set.autocrop, "checkbox"],
+					["autopos",		"Pas de chevauchements", p.set.autopos, "checkbox"]
 				],
 			};
 			
@@ -436,7 +458,7 @@
 			p.set.btnLoad.click(p.uploadConf);
 			p.set.btnSave.click(p.downloadConf);
 			p.set.btnDown.click(p.downloadSVG);
-			p.set.zonechps.find('input').on('change', p.updateSVGView);
+			//p.set.zonechps.find('input').on('change', p.updateSVGView);
 
 			//p.set.zoneElms.on('click', '.coin', p.transmuterCoin);
 			p.set.zoneElms.on('click', '.cote', p.transmuterCote);
@@ -491,7 +513,7 @@
 		{
 			var fld = $(e.currentTarget);
 			var k = (fld.attr('id').includes('.')) ? fld.attr('id').split('.') : fld.attr('id');
-			var newV = (isNaN(fld.val())) ? fld.val() : parseFloat(fld.val());
+			var newV = (isNaN(fld.val())) ? fld.is(':checked') : parseFloat(fld.val());
 			if(Array.isArray(k))
 			{p.set[k[0]][k[1]] = newV;}
 			else
@@ -505,7 +527,7 @@
 			var fld = $(e.currentTarget);
 			var elmID = fld.parents('.element').attr('id');
 			var k = (fld.attr('id').includes('.')) ? fld.attr('id').split('.') : fld.attr('id');
-			var newV = (isNaN(fld.val())) ? fld.val() : parseFloat(fld.val());
+			var newV = (isNaN(fld.val())) ? fld.is(':checked') : parseFloat(fld.val());
 			if(Array.isArray(k))
 			{p.set.listElms[elmID][k[0]][k[1]] = newV;}
 			else
