@@ -1,0 +1,343 @@
+// out: style.css, compress: true, math: always
+
+@import "z_reset.less";
+
+@wcold: 329px;
+@wcoin: 30px;
+@coteW: @wcold - 2*@wcoin - 34px;
+@mrgCote: 5px;
+
+body
+{
+	font-size: 18px;
+	font-family: system-ui,Roboto,Arial,sans-serif;
+
+	.makebox
+	{
+		display: flex;
+		flex-direction: row;
+		align-items: stretch;
+		min-height: 100vh;
+	
+		.vue
+		{
+			flex: 1 1 auto;
+			padding: 10px;
+			max-height: 100vh;
+			overflow: auto;
+
+			#preview
+			{
+				width: 99%;
+				height: auto;
+				display: block;
+
+				border: 1px solid #ddd;
+			}
+		}
+		
+		.conf
+		{
+			flex: (@wcold + 16px) 0 0;
+			border-left: 1px solid #999;
+
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+			max-height: 100vh;
+			
+			> .areachp
+			{
+				flex: 1 1 auto;
+				overflow: auto;
+
+				> div 
+				{
+					padding: 2px 10px 0;
+
+					&.listeelm 
+					{
+						background-color: #cbded2;
+						border-top: 1px solid #888;
+						label:after {background-color: #669966;}
+						padding: 5px 10px;
+						margin-top: 5px;
+			
+						.element
+						{
+							margin: 6px;
+							display: flex;
+							flex-flow: wrap;
+							width: (@wcold - 34px);
+			
+							> div
+							{
+								background-color: #fff;
+								overflow: hidden;
+			
+								&.coin
+								{
+									height: @wcoin;
+									width: @wcoin;
+									flex: 1 0 @wcoin;
+									position: relative;
+									cursor: pointer;
+			
+									> span
+									{
+										width: @wcoin - @mrgCote;
+										height: @wcoin - @mrgCote;
+										border: 1px dotted #333;
+										display: block;
+										position: absolute;
+			
+										right: 0;
+										bottom: 0;
+									}
+
+									&[data-type="1"] span
+									{
+										border-style: solid none none solid;
+										&:before {border-style: none none none solid;}
+										&:after {border-style: solid none none none;}
+									}
+									&[data-type="2"] span
+									{
+										border-style: none solid none none;
+										&:before {border-style: none solid none none;}
+										&:after {border-style: solid none none none;}
+									}
+									&[data-type="3"] span
+									{
+										width: 1px;
+										height: 1px;
+										background-color: #000;
+										border: none;
+									}
+									&[data-type="4"] span
+									{
+										border-style: none none solid none;
+										&:before {border-style: none none none solid;}
+										&:after {border-style: none none solid none;}
+									}
+
+			
+									&.hd {rotate: 90deg;}
+									&.bd {rotate: 180deg;}
+									&.bg {rotate: 270deg;}
+								}
+			
+			
+			
+								&.cote
+								{
+									position: relative;
+									cursor: pointer;
+
+									> span
+									{
+										position: relative;
+										display: block;
+									}
+			
+									&.g, &.d 
+									{
+										height: @coteW;
+										width: @wcoin;
+										flex: 1 0 @wcoin;
+
+										> span
+										{
+											height: @coteW;
+											width: @wcoin;
+					
+											&::before
+											{
+												height: @coteW;
+												width: @wcoin - @mrgCote;
+												content: "\00a0";
+												border-width: 1px 0;
+												border-color: #333;
+												display: block;
+											}
+										}
+
+										&[data-type="1"] span:before {background: url(assets/verti_type1.svg) 0 0 no-repeat;}
+										&[data-type="2"] span:before {background: url(assets/verti_type2.svg) 0 0 no-repeat;}
+										&[data-type="3"] span:before {background: url(assets/verti_type3.svg) 0 0 no-repeat;}
+										&[data-type="4"] span:before {background: url(assets/verti_type4.svg) 0 0 no-repeat;}
+										&[data-type="5"] span:before {background: url(assets/verti_type5.svg) 0 0 no-repeat;}
+									}
+			
+									&.h, &.b 
+									{
+										height: @wcoin;
+										width: @coteW;
+										flex: 1 0 @coteW;
+	
+										> span
+										{
+											width: @coteW;
+											height:  @wcoin - @mrgCote;
+											
+				
+											&::before
+											{
+												width: @coteW;
+												height: @wcoin - @mrgCote;
+												content: "\00a0";
+												border-width: 1px 0;
+												border-color: #333;
+												display: block;
+											}
+										}
+
+										&[data-type="1"] span:before {background: url(assets/cote_type1.svg) 0 0 no-repeat;}
+										&[data-type="2"] span:before {background: url(assets/cote_type2.svg) 0 0 no-repeat;}
+										&[data-type="3"] span:before {background: url(assets/cote_type3.svg) 0 0 no-repeat;}
+										&[data-type="4"] span:before {background: url(assets/cote_type4.svg) 0 0 no-repeat;}
+										&[data-type="5"] span:before {background: url(assets/cote_type5.svg) 0 0 no-repeat;}
+									}
+			
+			
+									&.h span 
+									{
+										margin-top: @mrgCote;
+									}
+									&.b span
+									{
+										&:before {rotate: 180deg;}
+									}
+									&.d span
+									{
+										&:before {rotate: 180deg;}
+									}
+									&.g span
+									{
+										margin-left: @mrgCote;
+									}
+								}
+			
+								&.zconf
+								{
+									width: @coteW;
+									height: @coteW;
+									flex: 1 0 (@coteW);
+									padding: 10px;
+
+									> div
+									{
+										> strong
+										{
+											font-size: 11px;
+											display: block;
+											margin-top: 5px;
+										}
+
+										&.btnlst
+										{
+											text-align: right;
+											
+											a
+											{
+												display: inline-block;
+												margin: 1px 4px;
+												background-color: #4d1056;
+												font-size: 9px;
+												color: #fff;
+												text-decoration: none;
+												padding: 2px 4px;
+												border-radius: 3px;
+												width: 25px;
+												text-align: center;
+											}
+										}
+									}
+			
+								}
+							}
+						}
+					}
+				}
+			}
+
+			.areabtn
+			{
+				flex: 0 0 120px;
+			}
+
+			> div
+			{
+				> a
+				{
+					line-height: 40px;
+					text-align: center;
+					color: #fff;
+					text-decoration: none;
+					display: block;
+					background-color: #36065f;
+
+					&.loader, &.saver {width: 50%; display: inline-block;}
+				}
+			}
+
+			label
+			{
+				display: inline-block;
+				position: relative;
+				width: 49%;
+				&:nth-child(2n) {margin-left: 2%;}
+				
+				input[type=text]
+				{
+					display: block;
+					width: 100%;
+					padding: 2px 4px;
+					border: 1px solid #999;
+					border-radius: 5px;
+					margin-bottom: 1px;
+					font-size: 12px;
+				}
+				&:after
+				{
+					position: absolute;
+					display: inline-block;
+					right: 0;
+					top: 0;
+					pointer-events: none;
+					background-color: #56046b;
+					color:#fff;
+					padding: 2px 4px;
+					content: attr(data-placeholder);
+					font-size: 11px;
+					border-radius: 0 5px 5px 0;
+				}
+
+				&.ischeck
+				{
+					&:after {position: static; margin-left: 5px;}
+				}
+			}
+
+			.quadri label
+			{
+				width: 24%;
+				margin-left: 1%;
+				&:nth-of-type(4n+1) {margin-left: 0;}
+			}
+		}
+		.document label:after {background-color: #56046b;}
+		.bois label:after {background-color: #04066b;}
+		.options label:after {background-color: #04696b;}
+		.dessin label:after {background-color: #6b1504;}
+		.boite 
+		{
+			background-color: #cbded2;
+			label:after {background-color: #046b2b;}
+		}
+	}
+
+}
+
+
+
